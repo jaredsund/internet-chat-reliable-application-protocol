@@ -1,0 +1,9 @@
+C:\Users\jareds\Documents\Visual Studio 2010\Projects\TCP_Test\TCP_Client_Test\TCP_Client_Test\bin\Debug\TCP_Client_Test.exe
+C:\Users\jareds\Documents\Visual Studio 2010\Projects\TCP_Test\TCP_Client_Test\TCP_Client_Test\bin\Debug\TCP_Client_Test.pdb
+C:\Users\jareds\Documents\Visual Studio 2010\Projects\TCP_Test\TCP_Client_Test\TCP_Client_Test\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Users\jareds\Documents\Visual Studio 2010\Projects\TCP_Test\TCP_Client_Test\TCP_Client_Test\obj\x86\Debug\TCP_Client_Test.Form1.resources
+C:\Users\jareds\Documents\Visual Studio 2010\Projects\TCP_Test\TCP_Client_Test\TCP_Client_Test\obj\x86\Debug\TCP_Client_Test.Properties.Resources.resources
+C:\Users\jareds\Documents\Visual Studio 2010\Projects\TCP_Test\TCP_Client_Test\TCP_Client_Test\obj\x86\Debug\GenerateResource.read.1.tlog
+C:\Users\jareds\Documents\Visual Studio 2010\Projects\TCP_Test\TCP_Client_Test\TCP_Client_Test\obj\x86\Debug\GenerateResource.write.1.tlog
+C:\Users\jareds\Documents\Visual Studio 2010\Projects\TCP_Test\TCP_Client_Test\TCP_Client_Test\obj\x86\Debug\TCP_Client_Test.exe
+C:\Users\jareds\Documents\Visual Studio 2010\Projects\TCP_Test\TCP_Client_Test\TCP_Client_Test\obj\x86\Debug\TCP_Client_Test.pdb
