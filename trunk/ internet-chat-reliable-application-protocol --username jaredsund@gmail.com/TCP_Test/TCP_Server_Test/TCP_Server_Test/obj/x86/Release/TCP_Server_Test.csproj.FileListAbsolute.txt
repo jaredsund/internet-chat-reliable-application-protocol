@@ -1,0 +1,10 @@
+C:\Users\jareds\AppData\Local\Temporary Projects\TCP_Server_Test\bin\Release\TCP_Server_Test.exe
+C:\Users\jareds\AppData\Local\Temporary Projects\TCP_Server_Test\bin\Release\TCP_Server_Test.pdb
+C:\Users\jareds\AppData\Local\Temporary Projects\TCP_Server_Test\obj\x86\Release\ResolveAssemblyReference.cache
+C:\Users\jareds\AppData\Local\Temporary Projects\TCP_Server_Test\obj\x86\Release\TCP_Server_Test.exe
+C:\Users\jareds\AppData\Local\Temporary Projects\TCP_Server_Test\obj\x86\Release\TCP_Server_Test.pdb
+C:\Users\jareds\Documents\Visual Studio 2010\Projects\TCP_Test\TCP_Server_Test\TCP_Server_Test\obj\x86\Release\TCP_Server_Test.exe
+C:\Users\jareds\Documents\Visual Studio 2010\Projects\TCP_Test\TCP_Server_Test\TCP_Server_Test\obj\x86\Release\TCP_Server_Test.pdb
+C:\Users\jareds\Documents\Visual Studio 2010\Projects\TCP_Test\TCP_Server_Test\TCP_Server_Test\bin\Release\TCP_Server_Test.exe
+C:\Users\jareds\Documents\Visual Studio 2010\Projects\TCP_Test\TCP_Server_Test\TCP_Server_Test\bin\Release\TCP_Server_Test.pdb
+C:\Users\jareds\Documents\Visual Studio 2010\Projects\TCP_Test\TCP_Server_Test\TCP_Server_Test\obj\x86\Release\ResolveAssemblyReference.cache
