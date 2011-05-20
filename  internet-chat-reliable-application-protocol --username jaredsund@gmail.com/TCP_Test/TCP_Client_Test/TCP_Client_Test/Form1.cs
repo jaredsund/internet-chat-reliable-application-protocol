@@ -22,10 +22,14 @@ namespace TCP_Client_Test
 
         private void button1_Click(object sender, EventArgs e)
         {
-            Connect("localhost", textBox1.Text);
+            Connect("localhost", textBox1.Text, Int32.Parse (textBox2.Text ));
+        }
+        private void button2_Click(object sender, EventArgs e)
+        {
+            Connect("localhost", textBox1.Text, Int32.Parse(textBox3.Text));
         }
 
-         void Connect(String server, String message)
+         void Connect(String server, String message, Int32 port)
         {
             try
             {
@@ -33,7 +37,7 @@ namespace TCP_Client_Test
                 // Note, for this client to work you need to have a TcpServer 
                 // connected to the same address as specified by the server, port
                 // combination.
-                Int32 port = 13000;
+                
                 TcpClient client = new TcpClient(server, port);
 
                 // Translate the passed message into ASCII and store it as a Byte array.
@@ -77,6 +81,8 @@ namespace TCP_Client_Test
 
             
         }
+
+        
 
     }
 }

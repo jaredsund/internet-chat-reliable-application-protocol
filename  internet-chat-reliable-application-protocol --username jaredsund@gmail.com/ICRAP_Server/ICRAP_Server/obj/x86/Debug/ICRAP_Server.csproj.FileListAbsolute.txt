@@ -1,0 +1,9 @@
+C:\Users\jareds\Documents\Visual Studio 2010\Projects\ICRAP\ICRAP_Server\ICRAP_Server\bin\Debug\ICRAP_Server.exe
+C:\Users\jareds\Documents\Visual Studio 2010\Projects\ICRAP\ICRAP_Server\ICRAP_Server\bin\Debug\ICRAP_Server.pdb
+C:\Users\jareds\Documents\Visual Studio 2010\Projects\ICRAP\ICRAP_Server\ICRAP_Server\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Users\jareds\Documents\Visual Studio 2010\Projects\ICRAP\ICRAP_Server\ICRAP_Server\obj\x86\Debug\ICRAP_Server.Form1.resources
+C:\Users\jareds\Documents\Visual Studio 2010\Projects\ICRAP\ICRAP_Server\ICRAP_Server\obj\x86\Debug\ICRAP_Server.Properties.Resources.resources
+C:\Users\jareds\Documents\Visual Studio 2010\Projects\ICRAP\ICRAP_Server\ICRAP_Server\obj\x86\Debug\GenerateResource.read.1.tlog
+C:\Users\jareds\Documents\Visual Studio 2010\Projects\ICRAP\ICRAP_Server\ICRAP_Server\obj\x86\Debug\GenerateResource.write.1.tlog
+C:\Users\jareds\Documents\Visual Studio 2010\Projects\ICRAP\ICRAP_Server\ICRAP_Server\obj\x86\Debug\ICRAP_Server.exe
+C:\Users\jareds\Documents\Visual Studio 2010\Projects\ICRAP\ICRAP_Server\ICRAP_Server\obj\x86\Debug\ICRAP_Server.pdb

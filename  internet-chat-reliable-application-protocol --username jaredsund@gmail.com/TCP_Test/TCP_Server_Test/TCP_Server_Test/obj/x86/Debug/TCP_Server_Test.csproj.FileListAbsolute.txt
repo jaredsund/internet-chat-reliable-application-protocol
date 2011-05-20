@@ -3,3 +3,5 @@ C:\Users\jareds\Documents\Visual Studio 2010\Projects\TCP_Test\TCP_Server_Test\T
 C:\Users\jareds\Documents\Visual Studio 2010\Projects\TCP_Test\TCP_Server_Test\TCP_Server_Test\obj\x86\Debug\ResolveAssemblyReference.cache
 C:\Users\jareds\Documents\Visual Studio 2010\Projects\TCP_Test\TCP_Server_Test\TCP_Server_Test\obj\x86\Debug\TCP_Server_Test.exe
 C:\Users\jareds\Documents\Visual Studio 2010\Projects\TCP_Test\TCP_Server_Test\TCP_Server_Test\obj\x86\Debug\TCP_Server_Test.pdb
+C:\Users\jareds\Documents\Visual Studio 2010\Projects\ICRAP\TCP_Test\TCP_Server_Test\TCP_Server_Test\obj\x86\Debug\TCP_Server_Test.exe
+C:\Users\jareds\Documents\Visual Studio 2010\Projects\ICRAP\TCP_Test\TCP_Server_Test\TCP_Server_Test\obj\x86\Debug\TCP_Server_Test.pdb
