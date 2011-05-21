@@ -15,14 +15,23 @@ namespace ICRAP_Server
 {
     public partial class Form1 : Form
     {
+        ControllerThread CT;
+
+       
+
         public Form1()
         {
             InitializeComponent();
         }
 
+       
+
+
+
+
         private void Form1_Load(object sender, EventArgs e)
         {
-            
+            CT = new ControllerThread(ref listBox1, ref listBox2 );   
         }
 
         private void button1_Click(object sender, EventArgs e)
