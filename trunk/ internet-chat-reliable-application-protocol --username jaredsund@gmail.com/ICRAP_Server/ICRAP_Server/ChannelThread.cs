@@ -17,17 +17,22 @@ namespace ICRAP_Server
         private System.Windows.Forms.ListBox  listbox;
         private Int32 port;
         private string ChannelName;
+        //private string _id;
         private ArrayList clients;
+        private int _maxClients;
 
+        private xmlResponseGen xRG;
+        
         public delegate void SetTextCallback(String text);
 
-
-
-        public ChannelThread(ref System.Windows.Forms.ListBox listbox, string ChannelName)
+        public ChannelThread(ref System.Windows.Forms.ListBox listbox, string ChannelName, int maxClients)
         {
+            //_id = Guid.NewGuid().ToString();
+            _maxClients = maxClients;
             clients = new ArrayList();
             this.listbox = listbox;
             this.ChannelName = ChannelName;
+            xRG = new xmlResponseGen();
             
             worker = new BackgroundWorker();
             worker.WorkerReportsProgress = true;
@@ -36,6 +41,11 @@ namespace ICRAP_Server
             worker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.worker_ProgressChanged);
             worker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.worker_RunWorkerCompleted);
             worker.RunWorkerAsync();
+        }
+
+        public string id
+        {
+            get { return this.port.ToString(); }
         }
 
         public string Name
@@ -53,9 +63,28 @@ namespace ICRAP_Server
             get { return clients.Count; }
         }
 
+        public int maxClients
+        {
+            set { _maxClients = value; }
+            get { return _maxClients; }
+        }
+
         public void killThread()
         {
             worker.CancelAsync();
+        }
+
+        public void killClient(string clientID)
+        {
+            foreach (ChannelClient CC in clients)
+            {
+                if (CC.id == clientID)
+                {
+                    SetText(String.Format("{2} - {0}:User: {1} ({3}) has beed dropped", ChannelName, CC.username, DateTime.Now.ToString(), CC.id ));
+                    clients.Remove(CC);
+                    break;
+                }//end if
+            }//end foreach
         }
 
         private void worker_DoWork(object sender, DoWorkEventArgs e)
@@ -63,10 +92,8 @@ namespace ICRAP_Server
             TcpListener server = null;
             try
             {
-                IPAddress localAddr = IPAddress.Parse("127.0.0.1");
-
                 //create a new tcp listener on port 0 (server assigned)
-                server = new TcpListener(localAddr, 0);
+                server = new TcpListener(Dns.GetHostAddresses("localhost")[0], 0);
 
                 // Start listening for client requests.
                 server.Start();
@@ -87,15 +114,17 @@ namespace ICRAP_Server
             catch (SocketException e2)
             {
                 worker.ReportProgress(99, String.Format("SocketException: {0}", e2));
+                server.Stop();
+                worker.CancelAsync();
             }
             finally
             {
                 // Stop listening for new clients.
                 server.Stop();
+                worker.CancelAsync();
             }
             worker.ReportProgress(0, String.Format ("Server Stopped" ));
         }
-
 
         private void SetText(string text)
         {
@@ -113,31 +142,76 @@ namespace ICRAP_Server
             }
         }
 
+        public void broadCastMessage(string message)
+        {
+            foreach (ChannelClient c in clients)
+            {
+                c.sendMessage(message);
+            }
+        }
+
         private void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-           
-            if (e.ProgressPercentage == 0)
+            string id = "";
+            string userName = "";
+
+            switch (e.ProgressPercentage)
             {
-                SetText(String.Format("{2} - {0}: {1}", ChannelName, e.UserState.ToString(), DateTime.Now.ToString()));
-                //listbox.Items.Insert(0, String.Format("{2} - {0}: {1}", ChannelName, e.UserState.ToString(), DateTime.Now.ToString ()));
-            }
-            else if (e.ProgressPercentage == 1)
-            {
-                foreach (ChannelClient c in clients)
-                {
-                    c.sendMessage(e.UserState.ToString());
-                }
-                //listbox.Items.Insert(0, String.Format("{2} - {0}: Sent: {1}", ChannelName, e.UserState.ToString(), DateTime.Now.ToString()));
-            }
-            else if (e.ProgressPercentage == 99)
-            {
-                listbox.Items.Insert(0, String.Format("{2} - Error: {0}, {1}", ChannelName, e.UserState.ToString(), DateTime.Now.ToString()));
-            }
+                case 0:
+                    SetText(String.Format("{2} - {0}: {1}", ChannelName, e.UserState.ToString(), DateTime.Now.ToString()));
+                    break;
+                case 1:
+                    broadCastMessage(e.UserState.ToString());
+                    break;
+                case 2:
+                    id = e.UserState.ToString().Split(new string[] { "ID=" }, StringSplitOptions.RemoveEmptyEntries)[1];
+                    foreach (ChannelClient CC in clients)
+                    {
+                        if (CC.id == id)
+                        {
+                            CC.sendMessage(xRG.responseEnumClients(ref clients ));
+                            SetText(String.Format("{2} - {0}: Enumerated Clients: , {1}", ChannelName, e.UserState.ToString(), DateTime.Now.ToString()));
+                     
+                            break;
+                        }
+                    }
+                    break;
+                case 3:
+                    _maxClients = int.Parse(e.UserState.ToString());
+                    SetText(String.Format("{2} - {0}: Max Clients Updated: , {1}", ChannelName, e.UserState.ToString(), DateTime.Now.ToString()));
+                     
+                    break;
+                case 99:
+                    SetText(String.Format("{2} - {0}: Error: , {1}", ChannelName, e.UserState.ToString(), DateTime.Now.ToString()));
+                    break;
+                case 100:
+                    id = e.UserState.ToString().Split(new string[] { "ID=" }, StringSplitOptions.RemoveEmptyEntries)[1];
+
+                    foreach (ChannelClient CC in clients)
+                    {
+                        if (CC.id == id)
+                        {
+                            userName = CC.username;
+                            clients.Remove(CC);
+                            SetText(String.Format("{2} - {0}:User: {1} ({3}) has beed dropped", ChannelName, userName, DateTime.Now.ToString(), id));
+                            break;
+                        }//end if
+                    }//end foreach
+                    break;
+            }//end switch
         }
 
         private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            listbox.Items.Add(String.Format ("{0}: done", ChannelName ));
+
+            foreach (ChannelClient CC in clients)
+            {
+                SetText(String.Format("{2} - {0}:User: {1} ({3}) has beed dropped", ChannelName, CC.username, DateTime.Now.ToString(), CC.id));
+                CC.killThread();
+                clients.Remove(CC);
+            }//end foreach
+
+            SetText(String.Format("{0}: done", ChannelName));
         }
 
     }

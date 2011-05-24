@@ -45,9 +45,63 @@ namespace TCP_Client_Test
             myThread2.sendMessage(textBox1.Text);
         }
 
+        private void button6_Click(object sender, EventArgs e)//enum channels
+        {
+            xmlControllerRequestGen xRG = new xmlControllerRequestGen();
+            string message = xRG.EnumChan();
+
+            try
+            {
+                // Create a TcpClient.
+                // Note, for this client to work you need to have a TcpServer 
+                // connected to the same address as specified by the server, port
+                // combination.
+
+                TcpClient client = new TcpClient("localhost", 13000);
+
+                // Translate the passed message into ASCII and store it as a Byte array.
+                Byte[] data = System.Text.Encoding.ASCII.GetBytes(message);
+
+                // Get a client stream for reading and writing.
+                //  Stream stream = client.GetStream();
+
+                NetworkStream stream = client.GetStream();
+
+                // Send the message to the connected TcpServer. 
+                stream.Write(data, 0, data.Length);
+
+                listBox1.Items.Add(String.Format("Sent: {0}", message));
+
+                // Receive the TcpServer.response.
+
+                // Buffer to store the response bytes.
+                data = new Byte[1024];
+
+                // String to store the response ASCII representation.
+                String responseData = String.Empty;
+
+                // Read the first batch of the TcpServer response bytes.
+                Int32 bytes = stream.Read(data, 0, data.Length);
+                responseData = System.Text.Encoding.ASCII.GetString(data, 0, bytes);
+                listBox1.Items.Add(String.Format("Received: {0}", responseData));
+
+                // Close everything.
+                stream.Close();
+                client.Close();
+            }
+            catch (ArgumentNullException e2)
+            {
+                listBox1.Items.Add(string.Format("ArgumentNullException: {0}", e2));
+            }
+            catch (SocketException e3)
+            {
+                listBox1.Items.Add(string.Format("SocketException: {0}", e3));
+            }
+        }
+
         private void button5_Click(object sender, EventArgs e)
         {
-            xmlRequestGen xRG = new xmlRequestGen();
+            xmlControllerRequestGen xRG = new xmlControllerRequestGen();
             string message = xRG.CreatChan(textBox4.Text);
 
             try
@@ -75,7 +129,7 @@ namespace TCP_Client_Test
                 // Receive the TcpServer.response.
 
                 // Buffer to store the response bytes.
-                data = new Byte[256];
+                data = new Byte[1024];
 
                 // String to store the response ASCII representation.
                 String responseData = String.Empty;
@@ -98,6 +152,8 @@ namespace TCP_Client_Test
                 listBox1.Items.Add ( string.Format("SocketException: {0}", e3));
             }
         }
+
+ 
 
         
 

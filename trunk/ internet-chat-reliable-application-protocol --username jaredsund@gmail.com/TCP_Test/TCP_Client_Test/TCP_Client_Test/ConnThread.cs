@@ -14,6 +14,8 @@ namespace TCP_Client_Test
         public Int32 port;
         ClientConn myClientConn;
 
+        xmlChannelRequestGen xCR;
+
         ~ConnThread()
         {
             myClientConn.Dispose();
@@ -21,6 +23,8 @@ namespace TCP_Client_Test
 
         public ConnThread(ref System.Windows.Forms.ListBox listbox, string server, Int32 port)
         {
+            xCR = new xmlChannelRequestGen();
+
             this.listbox = listbox;
             this.server = server;
             this.port = port;
@@ -47,16 +51,22 @@ namespace TCP_Client_Test
 
         public void sendMessage(string message)
         {
-            myClientConn.sendMessage(message);
+            myClientConn.sendMessage(xCR.postMessage(message));
         }
 
         private void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            ClientConn.CurrentState state = (ClientConn.CurrentState)e.UserState;
-            
-            port = state.port;
-
-            listbox.Items.Add(String.Format("{0}, {1}", port.ToString(), state.message));
+            switch (e.ProgressPercentage )
+            {
+                case 0:
+                    ClientConn.CurrentState state = (ClientConn.CurrentState)e.UserState;
+                    port = state.port;
+                    listbox.Items.Add(String.Format("{0}, {1}", port.ToString(), state.message));
+                    break;
+                case 99:
+                    listbox.Items.Add (String.Format("Error: {0}", e.UserState.ToString ()));
+                    break;
+            }
 
         }
 
