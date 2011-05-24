@@ -6,12 +6,12 @@ using System.Xml;
 
 namespace TCP_Client_Test
 {
-    class xmlRequestGen
+    class xmlControllerRequestGen
     {
         XmlDocument doc;
         XmlElement root;
 
-        public xmlRequestGen()
+        public xmlControllerRequestGen()
         {
             doc = new XmlDocument();// Create the XML Declaration, and append it to XML document
             XmlDeclaration dec = doc.CreateXmlDeclaration("1.0", "utf-8", null);
@@ -24,6 +24,16 @@ namespace TCP_Client_Test
             root.SetAttribute("command", "CreateChan");
             root.SetAttribute("clienname", "");
             root.SetAttribute("data", channelName);
+            doc.AppendChild(root);
+
+            return doc.InnerXml.ToString();
+        }
+
+        public string EnumChan()
+        {
+            root.SetAttribute("command", "EnumChan");
+            root.SetAttribute("clienname", "");
+            root.SetAttribute("data", "");
             doc.AppendChild(root);
 
             return doc.InnerXml.ToString();

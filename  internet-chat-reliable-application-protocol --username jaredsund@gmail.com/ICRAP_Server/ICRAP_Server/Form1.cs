@@ -17,44 +17,15 @@ namespace ICRAP_Server
     {
         ControllerThread CT;
 
-       
-
         public Form1()
         {
             InitializeComponent();
         }
 
-       
-
-
-
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            CT = new ControllerThread(ref listBox1, ref listBox2 );   
+            CT = new ControllerThread(ref listBox1, ref listBox2, 13000 );   
         }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            StartThread();
-        }
-
-        private void StartThread()
-        {
-            ChannelThread mythread = new ChannelThread(ref listBox1, "Channel 1");
-            ChannelThread mythread2 = new ChannelThread(ref listBox1, "Channel 2");
-
-            
-        }
-
-       
-        private void button2_Click(object sender, EventArgs e)
-        {
-            
-            
-        }
-
-       
-        
     }
 }

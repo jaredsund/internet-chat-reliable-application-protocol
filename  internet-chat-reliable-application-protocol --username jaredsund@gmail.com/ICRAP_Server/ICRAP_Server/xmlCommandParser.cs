@@ -10,8 +10,8 @@ namespace ICRAP_Server
     {
         XmlDocument doc;
         XmlNode node;
-        
 
+        //constructor
         public xmlCommandParser(string inputString)
         {
             doc = new XmlDocument();

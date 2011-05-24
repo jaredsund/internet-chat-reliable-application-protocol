@@ -17,9 +17,11 @@ namespace TCP_Client_Test
             public string message;
             public Int32 port;
             public string server;
+            public string ID;
+
 
         }
-
+        
         ArrayList clients = new ArrayList();
 
         CurrentState state = new CurrentState();
@@ -31,10 +33,12 @@ namespace TCP_Client_Test
 
         public ClientConn(ref System.ComponentModel.BackgroundWorker worker, ref System.ComponentModel.DoWorkEventArgs e, String server, Int32 port)
         {
+            
             this.worker = worker;
             this.e = e;
             state.port = port;
             state.server = server;
+            state.ID = Guid.NewGuid().ToString();
 
         }
 
@@ -83,20 +87,42 @@ namespace TCP_Client_Test
 
         public void recieveMessage()
         {
-            // Receive the TcpServer.response.
-
-            // Buffer to store the response bytes.
-            Byte[] data = new Byte[256];
-
-            // String to store the response ASCII representation.
-            String responseData = String.Empty;
-            while (true)
+            try
             {
-                // Read the first batch of the TcpServer response bytes.
-                Int32 bytes = stream.Read(data, 0, data.Length);
-                responseData = System.Text.Encoding.ASCII.GetString(data, 0, bytes);
-                state.message = string.Format("Received: {0}", responseData);
-                worker.ReportProgress(0, state);
+                // Receive the TcpServer.response.
+
+                // Buffer to store the response bytes.
+                Byte[] data = new Byte[1024];
+
+                // String to store the response ASCII representation.
+                String responseData = String.Empty;
+                while (true)
+                {
+                    // Read the first batch of the TcpServer response bytes.
+                    Int32 bytes = stream.Read(data, 0, data.Length);
+                    responseData = System.Text.Encoding.ASCII.GetString(data, 0, bytes);
+                    state.message = string.Format("Received: {0}", responseData);
+                    worker.ReportProgress(0, state);
+                }
+            }
+            catch (IOException e1)
+            {
+                worker.ReportProgress(99, String.Format("IOException: {0}:ID={1}", e1, state.ID));
+                worker.CancelAsync();
+            }
+            catch (SocketException e2)
+            {
+                worker.ReportProgress(99, String.Format("SocketException: {0}:ID={1}", e2, state.ID));
+                worker.CancelAsync();
+            }
+            catch (ObjectDisposedException e3)
+            {
+                worker.ReportProgress(99, String.Format("ObjectDisposedException: {0}:ID={1}", e3, state.ID));
+                worker.CancelAsync();
+            }
+            finally
+            {
+                worker.CancelAsync();
             }
         }
     }
