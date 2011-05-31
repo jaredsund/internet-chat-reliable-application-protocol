@@ -27,5 +27,15 @@ namespace ICRAP_Server
         {
             CT = new ControllerThread(ref listBox1, ref listBox2, 13000 );   
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            listBox1.Items.Clear();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            listBox2.Items.Clear();
+        }
     }
 }

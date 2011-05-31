@@ -157,13 +157,13 @@ namespace ICRAP_Server
 
             switch (e.ProgressPercentage)
             {
-                case 0:
+                case 0:// general message
                     SetText(String.Format("{2} - {0}: {1}", ChannelName, e.UserState.ToString(), DateTime.Now.ToString()));
                     break;
-                case 1:
+                case 1://post message
                     broadCastMessage(e.UserState.ToString());
                     break;
-                case 2:
+                case 2://enum clients
                     id = e.UserState.ToString().Split(new string[] { "ID=" }, StringSplitOptions.RemoveEmptyEntries)[1];
                     foreach (ChannelClient CC in clients)
                     {
@@ -171,15 +171,25 @@ namespace ICRAP_Server
                         {
                             CC.sendMessage(xRG.responseEnumClients(ref clients ));
                             SetText(String.Format("{2} - {0}: Enumerated Clients: , {1}", ChannelName, e.UserState.ToString(), DateTime.Now.ToString()));
-                     
                             break;
                         }
                     }
                     break;
-                case 3:
+                case 3: //set maxClients for the channel
                     _maxClients = int.Parse(e.UserState.ToString());
                     SetText(String.Format("{2} - {0}: Max Clients Updated: , {1}", ChannelName, e.UserState.ToString(), DateTime.Now.ToString()));
-                     
+                    break;
+                case 4: //close client
+                    id = e.UserState.ToString().Split(new string[] { "ID=" }, StringSplitOptions.RemoveEmptyEntries)[1];
+                    foreach (ChannelClient CC in clients)
+                    {
+                        if (CC.id == id)
+                        {
+                            SetText(String.Format("{2} - {0}: {1}", ChannelName, e.UserState.ToString(), DateTime.Now.ToString())); 
+                            clients.Remove(CC);
+                            break;
+                        }
+                    }
                     break;
                 case 99:
                     SetText(String.Format("{2} - {0}: Error: , {1}", ChannelName, e.UserState.ToString(), DateTime.Now.ToString()));

@@ -13,6 +13,7 @@ namespace TCP_Client_Test
         public string server;
         public Int32 port;
         ClientConn myClientConn;
+        private string userName;
 
         xmlChannelRequestGen xCR;
 
@@ -21,13 +22,14 @@ namespace TCP_Client_Test
             myClientConn.Dispose();
         }
 
-        public ConnThread(ref System.Windows.Forms.ListBox listbox, string server, Int32 port)
+        public ConnThread(ref System.Windows.Forms.ListBox listbox, string server, Int32 port, string userName)
         {
-            xCR = new xmlChannelRequestGen();
+            xCR = new xmlChannelRequestGen(userName );
 
             this.listbox = listbox;
             this.server = server;
             this.port = port;
+            this.userName = userName;
             
             worker = new BackgroundWorker();
             worker.WorkerReportsProgress = true;
@@ -43,15 +45,21 @@ namespace TCP_Client_Test
             worker.CancelAsync();
         }
 
+
         private void worker_DoWork(object sender, DoWorkEventArgs e)
         {
-            myClientConn = new ClientConn(ref worker, ref e, server, port);
+            myClientConn = new ClientConn(ref worker, ref e, server, port, userName );
             myClientConn.Connect();
         }
 
         public void sendMessage(string message)
         {
             myClientConn.sendMessage(xCR.postMessage(message));
+        }
+
+        public void closeConn()
+        {
+            myClientConn.sendMessage(xCR.closeConn());
         }
 
         private void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -61,10 +69,10 @@ namespace TCP_Client_Test
                 case 0:
                     ClientConn.CurrentState state = (ClientConn.CurrentState)e.UserState;
                     port = state.port;
-                    listbox.Items.Add(String.Format("{0}, {1}", port.ToString(), state.message));
+                    displayMessage(String.Format("{0}, {1}", port.ToString(), state.message));
                     break;
                 case 99:
-                    listbox.Items.Add (String.Format("Error: {0}", e.UserState.ToString ()));
+                    displayMessage(String.Format("Error: {0}", e.UserState.ToString()));
                     break;
             }
 
@@ -72,7 +80,14 @@ namespace TCP_Client_Test
 
         private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            listbox.Items.Add("done");
+            displayMessage("done");
+        }
+
+        private void displayMessage(string message)
+        {
+            listbox.Items.Add(message);
+            listbox.Items.Add("");
+            listbox.TopIndex = listbox.Items.Count - 1;
         }
     }
 }

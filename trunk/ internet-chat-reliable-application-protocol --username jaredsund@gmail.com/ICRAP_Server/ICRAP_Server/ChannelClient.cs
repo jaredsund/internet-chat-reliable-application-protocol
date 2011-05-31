@@ -124,10 +124,10 @@ namespace ICRAP_Server
             switch (xCP.command)
             {
                 case "AcceptClient":
+                    
                     break;
                 case "CloseConn":
-                    worker.ReportProgress(0, String.Format("Closing client: {0}:{1}", _userName, _id));
-                    worker.CancelAsync();
+                    worker.ReportProgress(4, String.Format("Closing client: {0}:ID={1}", _userName, _id));
                     break;
                 case "EnumClients":
                     worker.ReportProgress(2, String.Format("ID={0}, Username={1}", _id,_userName ));
@@ -146,8 +146,8 @@ namespace ICRAP_Server
                     worker.ReportProgress(1, String.Format("Closing Channel by client client: {0}:{1}", _userName, _id));
                     workerChannel.CancelAsync();
                     break;
-                default:
-                    sendMessage(xRG.eResponse(String.Format ("Common not understood: {0}", xCP.command )));
+                default://send message to the client, stating that the command was not understood.
+                    sendMessage(xRG.eResponse(String.Format ("Command not understood: {0}", xCP.command )));
                     break;
             }
         }

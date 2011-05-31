@@ -32,7 +32,6 @@ namespace ICRAP_Server
             maxChannels = 5;
             maxClients = 5;
             
-
             this.listbox = listbox;
             this.listbox2 = listbox2;
             this._port = port;
@@ -141,6 +140,12 @@ namespace ICRAP_Server
         {
             xmlResponseGen xG = new xmlResponseGen();
             TcpListener server = null;
+
+            //add default channels
+            channels.Add(new ChannelThread(ref listbox2, "The Question Room", maxClients));
+            channels.Add(new ChannelThread(ref listbox2, "The Answer Room", maxClients));
+            channels.Add(new ChannelThread(ref listbox2, "The New Room", maxClients));
+
             try
             {
                 server = new TcpListener(Dns.GetHostAddresses("localhost")[0], _port);
