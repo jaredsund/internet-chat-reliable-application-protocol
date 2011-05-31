@@ -10,9 +10,11 @@ namespace TCP_Client_Test
     {
         XmlDocument doc;
         XmlElement root;
+        private string userName;
 
-        public xmlChannelRequestGen()
+        public xmlChannelRequestGen(string userName)
         {
+            this.userName = userName;
             setupRoot();
         }
 
@@ -20,8 +22,19 @@ namespace TCP_Client_Test
         {
             setupRoot();
             root.SetAttribute("command", "PostMessage");
-            root.SetAttribute("clienname", "");
+            root.SetAttribute("clienname", userName);
             root.SetAttribute("data", message);
+            doc.AppendChild(root);
+
+            return doc.InnerXml.ToString();
+        }
+
+        public string closeConn()
+        {
+            setupRoot();
+            root.SetAttribute("command", "CloseConn");
+            root.SetAttribute("clienname", userName);
+            root.SetAttribute("data", "");
             doc.AppendChild(root);
 
             return doc.InnerXml.ToString();

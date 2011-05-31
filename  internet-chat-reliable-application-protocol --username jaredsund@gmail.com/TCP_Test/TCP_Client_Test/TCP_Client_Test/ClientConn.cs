@@ -18,6 +18,7 @@ namespace TCP_Client_Test
             public Int32 port;
             public string server;
             public string ID;
+            public string userName;
 
 
         }
@@ -31,7 +32,7 @@ namespace TCP_Client_Test
         System.ComponentModel.BackgroundWorker worker;
         System.ComponentModel.DoWorkEventArgs e;
 
-        public ClientConn(ref System.ComponentModel.BackgroundWorker worker, ref System.ComponentModel.DoWorkEventArgs e, String server, Int32 port)
+        public ClientConn(ref System.ComponentModel.BackgroundWorker worker, ref System.ComponentModel.DoWorkEventArgs e, String server, Int32 port, string userName)
         {
             
             this.worker = worker;
@@ -39,7 +40,7 @@ namespace TCP_Client_Test
             state.port = port;
             state.server = server;
             state.ID = Guid.NewGuid().ToString();
-
+            state.userName = userName;
         }
 
         public void Dispose()
