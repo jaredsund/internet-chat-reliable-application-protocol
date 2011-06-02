@@ -24,6 +24,7 @@ namespace TCP_Client_Test
             InitializeComponent();
             label3.Text = "";
             myController = new Controller(ref listBox2);
+            userName = textBoxUserName.Text;
         }
 
         
@@ -39,12 +40,21 @@ namespace TCP_Client_Test
             else if (Int32.TryParse(dr["port"].ToString(), out port))
             {
                 if (connectionThread != null)
+                {
                     connectionThread.closeConn();
 
+                    while (connectionThread.connOpen)
+                    {
+                        string g = "";   
+                    }
+                    connectionThread = null;
+                }
                 connectionThread = new ConnThread(ref listBox1, "localhost", port, userName);
+                
                 label3.Text = dr["name"].ToString();
                 myController.enumChannels();
                 clearMessages();
+                //connectionThread.acceptClient();
             }
             else
             {
@@ -53,6 +63,41 @@ namespace TCP_Client_Test
 
         }
 
+        private void button2_Click(object sender, EventArgs e)
+        {
+            if (connectionThread != null)
+            {
+                connectionThread.closeConn();
+
+                while (connectionThread.connOpen)
+                {
+                    string g = "";
+                }
+                connectionThread = null;
+                label3.Text = "";
+                myController.enumChannels();
+                clearMessages();
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)//destroy channel
+        {
+            DataRowView dr = (DataRowView)listBox2.SelectedItem;
+            Int32 port = 0;
+
+            if (dr == null)
+            {
+                return;
+            }
+            else if (Int32.TryParse(dr["port"].ToString(), out port))
+            {
+                myController.destChann(port);
+            }
+            else
+            {
+                MessageBox.Show("bad port :" + dr["port"].ToString() + " could not destroy to channel");
+            }
+        }
 
         private void displayMessage(string message)
         {
@@ -74,6 +119,7 @@ namespace TCP_Client_Test
         private void buttonSendMessage_Click(object sender, EventArgs e)
         {
             connectionThread.sendMessage(textBox1.Text);
+            myController.enumChannels();
         }
 
         private void buttonEnumChannels_Click(object sender, EventArgs e)
@@ -85,13 +131,6 @@ namespace TCP_Client_Test
         {
             myController.createChannel(textBox4.Text );
         }
-
-        
-
-        
-
-       
-
-        
+ 
     }
 }

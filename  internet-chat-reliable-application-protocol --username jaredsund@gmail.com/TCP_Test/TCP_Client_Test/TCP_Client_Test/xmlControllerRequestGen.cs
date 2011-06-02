@@ -31,6 +31,16 @@ namespace TCP_Client_Test
             return doc.InnerXml.ToString();
         }
 
+        public string DestChan(int port)
+        {
+            root.SetAttribute("command", "DestChan");
+            root.SetAttribute("clienname", userName);
+            root.SetAttribute("data", port.ToString ());
+            doc.AppendChild(root);
+
+            return doc.InnerXml.ToString();
+        }
+
         public string EnumChan()
         {
             root.SetAttribute("command", "EnumChan");

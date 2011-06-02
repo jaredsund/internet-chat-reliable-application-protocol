@@ -33,6 +33,9 @@ namespace ICRAP_Server
             this.eChannel = eChannel;
             xRG = new xmlResponseGen();
 
+            client = passedClient;
+            stream = client.GetStream();
+
             worker = new BackgroundWorker();
             worker.WorkerReportsProgress = true;
             worker.WorkerSupportsCancellation = true;
@@ -41,18 +44,23 @@ namespace ICRAP_Server
             worker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.worker_RunWorkerCompleted);
             worker.RunWorkerAsync();
 
-            client = passedClient;
-            stream = client.GetStream();
+            
         }//end of constructor
 
         //destructor
          ~ChannelClient()
         {
+            if (stream.CanRead || stream.CanWrite)
+            {
+                stream.Close();
+            }
             if (client.Connected)
             {
                 client.Close();
             }//end if
+            
              stream.Dispose();
+             client = null;
              worker.Dispose();
         }//end of destructor
 
@@ -64,19 +72,6 @@ namespace ICRAP_Server
         public string username
         {
             get { return _userName; }
-        }
-
-        public void killThread()
-        {
-            try
-            {
-                sendMessage("Connection closed by Server");
-                worker.CancelAsync();
-            }
-            finally
-            {
-                worker.CancelAsync();
-            }
         }
 
         public void sendMessage(string message)
@@ -92,59 +87,45 @@ namespace ICRAP_Server
                 }
                 else
                 {
-                    worker.CancelAsync();
+                    worker.ReportProgress(4, String.Format("Closing client ID:{0}", _id));                   
                 }
             }
-            catch (IOException e1)
+            catch (Exception e1)
             {
-                worker.ReportProgress(99, String.Format("IOException: {0}:ID={1}", e1, _id));
-                worker.CancelAsync();
-            }
-            catch (SocketException e2)
-            {
-                worker.ReportProgress(99, String.Format("SocketException: {0}:ID={1}", e2, _id));
-                worker.CancelAsync();
-            }
-            catch (ObjectDisposedException e3)
-            {
-                worker.ReportProgress(99, String.Format("ObjectDisposedException: {0}:ID={1}", e3, _id));
-                worker.CancelAsync();
-            }
-            finally
-            {
-                worker.CancelAsync();
+                worker.ReportProgress(99, String.Format("Exception: {0}:ID={1}", e1, _id));
             }
         }
 
         private void commands(string data)
         {
+            if (data == "")
+            {
+                return;
+            }
             xmlCommandParser xCP = new xmlCommandParser(data);
             xmlResponseGen xRG = new xmlResponseGen();
 
             switch (xCP.command)
             {
                 case "AcceptClient":
-                    
+                    _userName = xCP.clientName;
+                    worker.ReportProgress(5, String.Format ("{0}:{1}", xCP.clientName, _id));
                     break;
                 case "CloseConn":
-                    worker.ReportProgress(4, String.Format("Closing client: {0}:ID={1}", _userName, _id));
+                    worker.ReportProgress(99, String.Format("Closing client: {0}:ID={1}", _userName, _id));
                     break;
                 case "EnumClients":
                     worker.ReportProgress(2, String.Format("ID={0}, Username={1}", _id,_userName ));
                     break;
                 case "PostMessage":
                     worker.ReportProgress(0, string.Format("Data Recieved: {0}", xCP.data ));
-                    worker.ReportProgress(1, string.Format("{0}", xCP.data ));
+                    worker.ReportProgress(1, string.Format("{1}: {0}", xCP.data, username  ));
                     break;
                 case "killClient":
                     break;
                 case "SetMaxClients":
                     worker.ReportProgress (3,xCP.data );
                     sendMessage (xRG.sResponse ());
-                    break;
-                case "CloseChan":
-                    worker.ReportProgress(1, String.Format("Closing Channel by client client: {0}:{1}", _userName, _id));
-                    workerChannel.CancelAsync();
                     break;
                 default://send message to the client, stating that the command was not understood.
                     sendMessage(xRG.eResponse(String.Format ("Command not understood: {0}", xCP.command )));
@@ -166,35 +147,36 @@ namespace ICRAP_Server
                     commands(System.Text.Encoding.ASCII.GetString(data, 0, bytes));
                 }//end while loop
             }
-            catch (IOException e1)
+            catch (Exception eX)
             {
-                worker.ReportProgress(99, String.Format("IOException: {0}:ID={1}", e1, _id));
-                worker.CancelAsync();
-            }
-            catch (SocketException e2)
-            {
-                worker.ReportProgress(99, String.Format("SocketException: {0}:ID={1}", e2, _id));
-                worker.CancelAsync();
-            }
-            catch (ObjectDisposedException e3)
-            {
-                worker.ReportProgress(99, String.Format("ObjectDisposedException: {0}:ID={1}", e3, _id));
-                worker.CancelAsync();   
-            }
-            finally
-            {
-                worker.CancelAsync();
+                worker.ReportProgress(99, String.Format("Exception: {0}:ID={1}", eX, _id));
             }
         }
 
         private void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             workerChannel.ReportProgress(e.ProgressPercentage, e.UserState.ToString());
+
+            if (e.ProgressPercentage == 99)
+            {
+                if (stream != null)
+                {
+                    stream.Close();
+                }
+                client.Close();
+                worker.CancelAsync();
+            }
         }
 
         private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            
             workerChannel.ReportProgress(100, String.Format("User ID={0}", _id));
+        }
+
+        public void killThread()
+        {
+            worker.CancelAsync();
         }
     }
 }

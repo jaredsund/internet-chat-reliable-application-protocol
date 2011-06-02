@@ -46,7 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClientConn.cs" />
+    <Compile Include="xmlChannelParser.cs" />
     <Compile Include="ConnThread.cs" />
     <Compile Include="Controller.cs" />
     <Compile Include="Form1.cs">

@@ -18,6 +18,17 @@ namespace TCP_Client_Test
             setupRoot();
         }
 
+        public string genMessage(string command, string userName, string data)
+        {
+            setupRoot();
+            root.SetAttribute("command", command);
+            root.SetAttribute("clientname", userName);
+            root.SetAttribute("data", data);
+            doc.AppendChild(root);
+
+            return doc.InnerXml.ToString();
+        }
+
         public string postMessage(string message)
         {
             setupRoot();
@@ -29,17 +40,7 @@ namespace TCP_Client_Test
             return doc.InnerXml.ToString();
         }
 
-        public string closeConn()
-        {
-            setupRoot();
-            root.SetAttribute("command", "CloseConn");
-            root.SetAttribute("clienname", userName);
-            root.SetAttribute("data", "");
-            doc.AppendChild(root);
-
-            return doc.InnerXml.ToString();
-        }
-
+       
         private void setupRoot()
         {
             doc = new XmlDocument();// Create the XML Declaration, and append it to XML document
