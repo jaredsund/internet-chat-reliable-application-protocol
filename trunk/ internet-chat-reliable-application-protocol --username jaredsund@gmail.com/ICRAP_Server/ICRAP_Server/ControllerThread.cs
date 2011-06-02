@@ -60,6 +60,10 @@ namespace ICRAP_Server
          private void Commands(ref string data)
          {
              xmlResponseGen xRG = new xmlResponseGen();
+             if (data == "")
+             {
+                 string junk = "";
+             }
              xmlCommandParser xCP = new xmlCommandParser(data);
 
              switch (xCP.command)
@@ -87,6 +91,7 @@ namespace ICRAP_Server
                          {
                              cT.killThread();
                              data = xRG.sResponse();
+                             channels.Remove(cT);
                              killedChannel = true;
                              break;
                          }
@@ -162,7 +167,6 @@ namespace ICRAP_Server
                 {
                     worker.ReportProgress(0, "Waiting for connection ...");
                     // Perform a blocking call to accept requests.
-                    // You could also user server.AcceptSocket() here.
                     TcpClient client = server.AcceptTcpClient();
   
                     worker.ReportProgress(0, "Connected!");

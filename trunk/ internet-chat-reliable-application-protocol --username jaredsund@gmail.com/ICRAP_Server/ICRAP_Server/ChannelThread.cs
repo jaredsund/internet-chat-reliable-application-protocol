@@ -21,6 +21,8 @@ namespace ICRAP_Server
         private ArrayList clients;
         private int _maxClients;
 
+        TcpListener server;
+
         private xmlResponseGen xRG;
         
         public delegate void SetTextCallback(String text);
@@ -33,6 +35,7 @@ namespace ICRAP_Server
             this.listbox = listbox;
             this.ChannelName = ChannelName;
             xRG = new xmlResponseGen();
+
             
             worker = new BackgroundWorker();
             worker.WorkerReportsProgress = true;
@@ -71,6 +74,13 @@ namespace ICRAP_Server
 
         public void killThread()
         {
+            broadCastMessage("This Channel has been closed");
+            foreach (ChannelClient CC in clients)
+            {
+                CC.killThread();
+                  
+            }
+            server.Stop();
             worker.CancelAsync();
         }
 
@@ -89,7 +99,7 @@ namespace ICRAP_Server
 
         private void worker_DoWork(object sender, DoWorkEventArgs e)
         {
-            TcpListener server = null;
+            server = null;
             try
             {
                 //create a new tcp listener on port 0 (server assigned)
@@ -111,9 +121,9 @@ namespace ICRAP_Server
                     worker.ReportProgress(0, String.Format ("Client Connected" ));
                 }
             }
-            catch (SocketException e2)
+            catch (Exception e2)
             {
-                worker.ReportProgress(99, String.Format("SocketException: {0}", e2));
+                worker.ReportProgress(99, String.Format("Exception: {0}", e2));
                 server.Stop();
                 worker.CancelAsync();
             }
@@ -185,11 +195,35 @@ namespace ICRAP_Server
                     {
                         if (CC.id == id)
                         {
-                            SetText(String.Format("{2} - {0}: {1}", ChannelName, e.UserState.ToString(), DateTime.Now.ToString())); 
+                            SetText(String.Format("{2} - {0}: {1}", ChannelName, e.UserState.ToString(), DateTime.Now.ToString()));
+                            
                             clients.Remove(CC);
+                            
                             break;
                         }
                     }
+                    break;
+                case 5: //accept user
+                    bool userExists = false;
+                        id = e.UserState.ToString().Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries)[1];
+                        userName = e.UserState.ToString().Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries)[0];
+
+                    foreach (ChannelClient CC in clients)
+                    {
+
+                        if (CC.username == userName && CC.id != id)
+                        {
+                            CC.sendMessage("Username cannot be used, server closing connection");
+                            clients.Remove(CC);
+                            userExists = true;
+                            break;
+                        }
+                    }
+                    if (userExists == false)
+                    {
+                        broadCastMessage(String.Format("{0}: has joined", userName));
+                    }
+                    
                     break;
                 case 99:
                     SetText(String.Format("{2} - {0}: Error: , {1}", ChannelName, e.UserState.ToString(), DateTime.Now.ToString()));
@@ -218,7 +252,6 @@ namespace ICRAP_Server
             {
                 SetText(String.Format("{2} - {0}:User: {1} ({3}) has beed dropped", ChannelName, CC.username, DateTime.Now.ToString(), CC.id));
                 CC.killThread();
-                clients.Remove(CC);
             }//end foreach
 
             SetText(String.Format("{0}: done", ChannelName));

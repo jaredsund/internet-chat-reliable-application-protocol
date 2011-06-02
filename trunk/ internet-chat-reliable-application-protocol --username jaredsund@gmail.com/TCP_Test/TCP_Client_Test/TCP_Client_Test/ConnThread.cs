@@ -3,33 +3,39 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.ComponentModel;
+using System.IO;
+using System.Net;
+using System.Net.Sockets;
 
 namespace TCP_Client_Test
 {
     class ConnThread
     {
         private BackgroundWorker worker;
+
         private System.Windows.Forms.ListBox listbox;
-        public string server;
-        public Int32 port;
-        ClientConn myClientConn;
+        
+        private string server;
+        private Int32 port;
         private string userName;
 
-        xmlChannelRequestGen xCR;
+        private xmlChannelRequestGen xCR;
 
-        ~ConnThread()
-        {
-            myClientConn.Dispose();
-        }
+        private TcpClient client;
+        private NetworkStream stream;
+
+        public bool connOpen;
+
+        public delegate void SetTextCallback(String text);
 
         public ConnThread(ref System.Windows.Forms.ListBox listbox, string server, Int32 port, string userName)
         {
-            xCR = new xmlChannelRequestGen(userName );
-
             this.listbox = listbox;
             this.server = server;
             this.port = port;
             this.userName = userName;
+
+            xCR = new xmlChannelRequestGen(this.userName);
             
             worker = new BackgroundWorker();
             worker.WorkerReportsProgress = true;
@@ -40,26 +46,72 @@ namespace TCP_Client_Test
             worker.RunWorkerAsync();
         }
 
-        public void killThread()
-        {
-            worker.CancelAsync();
-        }
-
-
         private void worker_DoWork(object sender, DoWorkEventArgs e)
         {
-            myClientConn = new ClientConn(ref worker, ref e, server, port, userName );
-            myClientConn.Connect();
+            try
+            {
+                client = new TcpClient(server, port);
+                connOpen = true;
+                stream = client.GetStream();
+                send(xCR.genMessage("AcceptClient", userName, ""));
+
+                // Receive the TcpServer.response.
+                // Buffer to store the response bytes.
+                Byte[] data = new Byte[1024];
+
+                // String to store the response ASCII representation.
+                String responseData = String.Empty;
+                while (true)
+                {
+                    // Read the first batch of the TcpServer response bytes.
+                    Int32 bytes = stream.Read(data, 0, data.Length);
+                    responseData = System.Text.Encoding.ASCII.GetString(data, 0, bytes);
+                    xmlChannelParser xCP = new xmlChannelParser(responseData);
+                    worker.ReportProgress(0, string.Format(xCP.data ));
+                }
+
+            }
+            catch (Exception e2)
+            {
+                if (stream != null)
+                {
+                    stream.Close();
+                }
+                if (client != null)
+                {
+                    client.Close();
+                }
+                connOpen = false;
+                //worker.ReportProgress(99, string.Format("Exception: {0}", e2));
+                worker.CancelAsync();
+            } 
+        }
+
+        private void send(string message)
+        {
+            try
+            {
+                // Translate the passed message into ASCII and store it as a Byte array.
+                Byte[] data = System.Text.Encoding.ASCII.GetBytes(message);
+                // Send the message to the connected TcpServer. 
+                stream.Write(data, 0, data.Length);
+               // worker.ReportProgress(0, String.Format("Sent: {0}", message));
+            }
+            catch (Exception e)
+            {
+                worker.ReportProgress(99, String.Format("Exception: {0}", e));
+            }
         }
 
         public void sendMessage(string message)
         {
-            myClientConn.sendMessage(xCR.postMessage(message));
+            send(xCR.postMessage(message));
         }
 
         public void closeConn()
         {
-            myClientConn.sendMessage(xCR.closeConn());
+            send(xCR.genMessage("CloseConn", userName, ""));
+            stream.Close();
         }
 
         private void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -67,27 +119,46 @@ namespace TCP_Client_Test
             switch (e.ProgressPercentage )
             {
                 case 0:
-                    ClientConn.CurrentState state = (ClientConn.CurrentState)e.UserState;
-                    port = state.port;
-                    displayMessage(String.Format("{0}, {1}", port.ToString(), state.message));
+                    SetText(String.Format(e.UserState.ToString ()));
                     break;
                 case 99:
-                    displayMessage(String.Format("Error: {0}", e.UserState.ToString()));
+                    SetText(String.Format("Error: {0}", e.UserState.ToString()));
+                    //closeConn();
                     break;
-            }
+            }//end switch statement
 
         }
 
+       
         private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            displayMessage("done");
+            if(stream != null)
+            stream.Close();
+            if(client != null)
+            client.Close();
+            connOpen = false;
+           // SetText("done");
         }
 
-        private void displayMessage(string message)
+        private void SetText(string text)
         {
-            listbox.Items.Add(message);
-            listbox.Items.Add("");
-            listbox.TopIndex = listbox.Items.Count - 1;
+            // InvokeRequired required compares the thread ID of the
+            // calling thread to the thread ID of the creating thread.
+            // If these threads are different, it returns true.
+            if (this.listbox.InvokeRequired)
+            {
+                SetTextCallback d = new SetTextCallback(SetText);
+                listbox.Invoke(d, new object[] { text });
+            }
+            else
+            {
+               // this.listbox.Items.Insert(0, text);
+                listbox.Items.Add(text);
+                listbox.Items.Add("");
+                listbox.TopIndex = listbox.Items.Count - 1;
+            }
         }
+
+        
     }
 }
