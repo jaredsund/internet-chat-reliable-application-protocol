@@ -22,7 +22,6 @@ namespace ICRAP_Server
             InitializeComponent();
         }
 
-
         private void Form1_Load(object sender, EventArgs e)
         {
             CT = new ControllerThread(ref listBox1, ref listBox2, 13000 );   

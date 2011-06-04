@@ -51,13 +51,10 @@ namespace ICRAP_Server
          ~ChannelClient()
         {
             if (stream.CanRead || stream.CanWrite)
-            {
                 stream.Close();
-            }
+
             if (client.Connected)
-            {
                 client.Close();
-            }//end if
             
              stream.Dispose();
              client = null;
@@ -99,9 +96,8 @@ namespace ICRAP_Server
         private void commands(string data)
         {
             if (data == "")
-            {
                 return;
-            }
+
             xmlCommandParser xCP = new xmlCommandParser(data);
             xmlResponseGen xRG = new xmlResponseGen();
 
@@ -137,13 +133,11 @@ namespace ICRAP_Server
         {
             try
             {
-                // Loop to receive all the data sent by the client.
                 Byte[] data = new Byte[1024];
 
-                while (true)//stream.DataAvailable
+                while (true)
                 {
                     Int32 bytes = stream.Read(data, 0, data.Length);
-                    //blocking, waiting for new string from the client
                     commands(System.Text.Encoding.ASCII.GetString(data, 0, bytes));
                 }//end while loop
             }
@@ -176,6 +170,7 @@ namespace ICRAP_Server
 
         public void killThread()
         {
+            stream.Close();
             worker.CancelAsync();
         }
     }
