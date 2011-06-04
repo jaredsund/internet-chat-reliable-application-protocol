@@ -55,15 +55,10 @@ namespace TCP_Client_Test
                 stream = client.GetStream();
                 send(xCR.genMessage("AcceptClient", userName, ""));
 
-                // Receive the TcpServer.response.
-                // Buffer to store the response bytes.
                 Byte[] data = new Byte[1024];
-
-                // String to store the response ASCII representation.
-                String responseData = String.Empty;
+                String responseData = "";
                 while (true)
                 {
-                    // Read the first batch of the TcpServer response bytes.
                     Int32 bytes = stream.Read(data, 0, data.Length);
                     responseData = System.Text.Encoding.ASCII.GetString(data, 0, bytes);
                     xmlChannelParser xCP = new xmlChannelParser(responseData);
@@ -91,11 +86,8 @@ namespace TCP_Client_Test
         {
             try
             {
-                // Translate the passed message into ASCII and store it as a Byte array.
-                Byte[] data = System.Text.Encoding.ASCII.GetBytes(message);
-                // Send the message to the connected TcpServer. 
+                Byte[] data = System.Text.Encoding.ASCII.GetBytes(message); 
                 stream.Write(data, 0, data.Length);
-               // worker.ReportProgress(0, String.Format("Sent: {0}", message));
             }
             catch (Exception e)
             {

@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.ComponentModel;
-
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -14,29 +13,26 @@ namespace ICRAP_Server
     class ChannelThread
     {
         private BackgroundWorker worker;
-        private System.Windows.Forms.ListBox  listbox;
+        private System.Windows.Forms.ListBox listbox;
         private Int32 port;
         private string ChannelName;
-        //private string _id;
         private ArrayList clients;
         private int _maxClients;
 
-        TcpListener server;
+        private TcpListener server;
 
         private xmlResponseGen xRG;
-        
+
         public delegate void SetTextCallback(String text);
 
         public ChannelThread(ref System.Windows.Forms.ListBox listbox, string ChannelName, int maxClients)
         {
-            //_id = Guid.NewGuid().ToString();
             _maxClients = maxClients;
             clients = new ArrayList();
             this.listbox = listbox;
             this.ChannelName = ChannelName;
             xRG = new xmlResponseGen();
 
-            
             worker = new BackgroundWorker();
             worker.WorkerReportsProgress = true;
             worker.WorkerSupportsCancellation = true;
@@ -76,10 +72,8 @@ namespace ICRAP_Server
         {
             broadCastMessage("This Channel has been closed");
             foreach (ChannelClient CC in clients)
-            {
                 CC.killThread();
-                  
-            }
+
             server.Stop();
             worker.CancelAsync();
         }
@@ -90,7 +84,7 @@ namespace ICRAP_Server
             {
                 if (CC.id == clientID)
                 {
-                    SetText(String.Format("{2} - {0}:User: {1} ({3}) has beed dropped", ChannelName, CC.username, DateTime.Now.ToString(), CC.id ));
+                    SetText(String.Format("{2} - {0}:User: {1} ({3}) has beed dropped", ChannelName, CC.username, DateTime.Now.ToString(), CC.id));
                     clients.Remove(CC);
                     break;
                 }//end if
@@ -107,18 +101,19 @@ namespace ICRAP_Server
 
                 // Start listening for client requests.
                 server.Start();
+                //get the server generated port
                 port = ((IPEndPoint)server.LocalEndpoint).Port;
-                
+
                 // Enter the listening loop.
                 while (true)
                 {
-                    worker.ReportProgress(0, String.Format ("Waiting for a connection on port: {0}", port.ToString ()));
- 
+                    worker.ReportProgress(0, String.Format("Waiting for a connection on port: {0}", port.ToString()));
+
                     // Perform a blocking call to accept requests.
                     TcpClient client = server.AcceptTcpClient();
                     ChannelClient cc = new ChannelClient(client, ref worker, ref e);
                     clients.Add(cc);
-                    worker.ReportProgress(0, String.Format ("Client Connected" ));
+                    worker.ReportProgress(0, String.Format("Client Connected"));
                 }
             }
             catch (Exception e2)
@@ -133,22 +128,19 @@ namespace ICRAP_Server
                 server.Stop();
                 worker.CancelAsync();
             }
-            worker.ReportProgress(0, String.Format ("Server Stopped" ));
+            worker.ReportProgress(0, String.Format("Server Stopped"));
         }
 
         private void SetText(string text)
         {
-            // InvokeRequired required compares the thread ID of the
-            // calling thread to the thread ID of the creating thread.
-            // If these threads are different, it returns true.
-            if (this.listbox .InvokeRequired)
+            if (this.listbox.InvokeRequired)
             {
                 SetTextCallback d = new SetTextCallback(SetText);
                 listbox.Invoke(d, new object[] { text });
             }
             else
             {
-                this.listbox.Items.Insert (0, text);
+                this.listbox.Items.Insert(0, text);
             }
         }
 
@@ -179,11 +171,11 @@ namespace ICRAP_Server
                     {
                         if (CC.id == id)
                         {
-                            CC.sendMessage(xRG.responseEnumClients(ref clients ));
+                            CC.sendMessage(xRG.responseEnumClients(ref clients));
                             SetText(String.Format("{2} - {0}: Enumerated Clients: , {1}", ChannelName, e.UserState.ToString(), DateTime.Now.ToString()));
                             break;
-                        }
-                    }
+                        }//end if
+                    }//end foreach ChannelClient loop
                     break;
                 case 3: //set maxClients for the channel
                     _maxClients = int.Parse(e.UserState.ToString());
@@ -196,39 +188,46 @@ namespace ICRAP_Server
                         if (CC.id == id)
                         {
                             SetText(String.Format("{2} - {0}: {1}", ChannelName, e.UserState.ToString(), DateTime.Now.ToString()));
-                            
                             clients.Remove(CC);
-                            
                             break;
-                        }
-                    }
+                        }//end if
+                    }//end foreach loop
                     break;
                 case 5: //accept user
                     bool userExists = false;
-                        id = e.UserState.ToString().Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries)[1];
-                        userName = e.UserState.ToString().Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries)[0];
+                    id = e.UserState.ToString().Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries)[1];
+                    userName = e.UserState.ToString().Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries)[0];
 
                     foreach (ChannelClient CC in clients)
                     {
-
-                        if (CC.username == userName && CC.id != id)
+                        if (CC.username == userName && CC.id != id)//finds an existing matched users with a different ID
                         {
-                            CC.sendMessage("Username cannot be used, server closing connection");
-                            clients.Remove(CC);
                             userExists = true;
                             break;
-                        }
-                    }
+                        }//end if
+                    }//end foreach loop
+
                     if (userExists == false)
                     {
                         broadCastMessage(String.Format("{0}: has joined", userName));
                     }
-                    
+                    else
+                    {
+                        foreach (ChannelClient CC in clients)
+                        {
+                            if (CC.id == id)
+                            {
+                                CC.sendMessage("Username cannot be used, server closing connection");
+                                clients.Remove(CC);
+                                break;
+                            }//end if
+                        }//end foreach loop
+                    }//end if
                     break;
-                case 99:
+                case 99:  //errro
                     SetText(String.Format("{2} - {0}: Error: , {1}", ChannelName, e.UserState.ToString(), DateTime.Now.ToString()));
                     break;
-                case 100:
+                case 100:  //user dropped
                     id = e.UserState.ToString().Split(new string[] { "ID=" }, StringSplitOptions.RemoveEmptyEntries)[1];
 
                     foreach (ChannelClient CC in clients)
@@ -247,7 +246,6 @@ namespace ICRAP_Server
 
         private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-
             foreach (ChannelClient CC in clients)
             {
                 SetText(String.Format("{2} - {0}:User: {1} ({3}) has beed dropped", ChannelName, CC.username, DateTime.Now.ToString(), CC.id));

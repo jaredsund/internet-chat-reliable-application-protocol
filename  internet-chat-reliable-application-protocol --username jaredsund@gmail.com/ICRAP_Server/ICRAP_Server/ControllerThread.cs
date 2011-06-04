@@ -5,11 +5,9 @@ using System.Linq;
 using System.Text;
 using System.ComponentModel;
 using System.Reflection;
-
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-
 using System.Xml;
 
 
@@ -94,8 +92,8 @@ namespace ICRAP_Server
                              channels.Remove(cT);
                              killedChannel = true;
                              break;
-                         }
-                     }
+                         }//end if
+                     }//end foreach loop
                      if(killedChannel == false )
                         data = xRG.eResponse(String.Format("Could not kill channel with port {0}", xCP.data));
                      break;
@@ -103,7 +101,7 @@ namespace ICRAP_Server
                      foreach (ChannelThread cT in channels)
                      {
                          cT.killClient(xCP.data);
-                     }
+                     }//end foreach loop
                      xRG.sResponse();
                      break;
                  case "SetMaxChan":
@@ -128,7 +126,7 @@ namespace ICRAP_Server
                      foreach (ChannelThread cT in channels)
                      {
                          cT.broadCastMessage(xCP.data);
-                     }
+                     }//end foreach loop
                      data = xRG.sResponse();
                      break;
                  case "Version":
@@ -162,8 +160,7 @@ namespace ICRAP_Server
                 Byte[] bytes = new Byte[1024];
                 String data = null;
 
-                // Enter the listening loop.
-                while (true)
+                while (true) // Enter the listening loop.
                 {
                     worker.ReportProgress(0, "Waiting for connection ...");
                     // Perform a blocking call to accept requests.
@@ -173,7 +170,7 @@ namespace ICRAP_Server
 
                     data = null;
 
-                    // Get a stream object for reading and writing
+                    // Get a stream object
                     NetworkStream stream = client.GetStream();
 
                     int i=0;
@@ -181,7 +178,7 @@ namespace ICRAP_Server
                     // Loop to receive all the data sent by the client.
                     while ((i = stream.Read(bytes, 0, bytes.Length)) != 0)
                     {
-                        // Translate data bytes to a ASCII string.
+                        // Translate data bytes to a ASCII
                         data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
                         worker.ReportProgress (0, String.Format ("Received: {0}", data));
 
@@ -220,7 +217,6 @@ namespace ICRAP_Server
                 case 99:
                     listbox.Items.Insert(0, String.Format("{2} - Error: {0}, {1}", "Controller", e.UserState.ToString(), DateTime.Now.ToString()));
                     break;
-
             }//end switch case   
         }
 
